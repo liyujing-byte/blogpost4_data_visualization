@@ -219,9 +219,8 @@ ggsave(
   bg = "white"
 )
 
-# ---- 6. Figure 2: Population paths for selected states ----
+# ---- Figure 2: Population paths for selected states ----
 
-# 按累计增长率排序，选最高三个州和最低三个州
 ranked_states <- state_summary[
   order(-state_summary$growth_pct),
 ]
@@ -233,7 +232,6 @@ selected_states <- c(
 
 print(selected_states)
 
-# 将全部 50 州的数据转换为“每行一个州的一年”
 population_long <- do.call(
   rbind,
   lapply(2020:2025, function(year) {
@@ -251,7 +249,7 @@ population_long <- do.call(
     )
   })
 )
-# 检查：50 州 × 6 年；所有州在 2020 年的指数都为 100
+
 stopifnot(
   nrow(population_long) == 300,
   all(population_long$population_index[
@@ -259,14 +257,12 @@ stopifnot(
   ] == 100)
 )
 
-# 保存长表，方便复现
 write.csv(
   population_long,
   "data/processed/state_population_long.csv",
   row.names = FALSE
 )
 
-# 筛选绘图用的六个州
 plot2_data <- population_long[
   population_long$state %in% selected_states,
 ]
@@ -276,7 +272,6 @@ plot2_data$state <- factor(
   levels = selected_states
 )
 
-# 绘制趋势图
 figure2 <- ggplot(
   plot2_data,
   aes(
@@ -333,16 +328,14 @@ ggsave(
   bg = "white"
 )
 
-# ---- 7. Figure 3: Growth rates versus population increases ----
+# ---- Figure 3: Growth rates versus population increases ----
 
 library(ggrepel)
 
-# 新增人口数换算为百万人
 plot3_data <- state_summary
 plot3_data$change_millions <-
   plot3_data$population_change / 1000000
 
-# 标注两种排名各自的前三名，自动去除重复州名
 label_states <- union(
   head(
     state_summary$state[order(-state_summary$growth_pct)],
@@ -430,7 +423,7 @@ ggsave(
   bg = "white"
 )
 
-# ---- 8. Check outputs and record the R environment ----
+# ----  Check outputs and record the R environment ----
 
 expected_figures <- c(
   "figures/figure1_state_population_growth.png",
@@ -438,13 +431,11 @@ expected_figures <- c(
   "figures/figure3_growth_vs_population_increase.png"
 )
 
-# 确认三张图片存在，且文件不为空
 stopifnot(
   all(file.exists(expected_figures)),
   all(file.info(expected_figures)$size > 0)
 )
 
-# 显示图片文件和大小
 print(
   data.frame(
     file = basename(expected_figures),
@@ -453,7 +444,6 @@ print(
   row.names = FALSE
 )
 
-# 记录 R 和所用包的版本，方便别人复现
 writeLines(
   capture.output(sessionInfo()),
   "data/processed/session_info.txt"
